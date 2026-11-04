@@ -1,0 +1,38 @@
+import Link from 'next/link'
+import { redirect } from 'next/navigation'
+import { HeartPulse, LogOut } from 'lucide-react'
+import { createClient } from '@/lib/supabase/server'
+import { LogoutButton } from '@/components/ui'
+import { ThemeToggle } from '@/components/ThemeToggle'
+
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const { data: profile } = await supabase
+    .from('profiles').select('role, full_name, specialty').eq('id', user.id).single()
+
+  return (
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors">
+      <header className="border-b border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
+          <Link href="/dashboard" className="flex items-center gap-2 font-bold text-blue-700 dark:text-blue-400">
+            <HeartPulse className="h-6 w-6" /> Hospital Unheval
+          </Link>
+          <div className="flex items-center gap-4 text-sm">
+            <ThemeToggle />
+            <div className="text-right">
+              <div className="font-medium text-slate-900 dark:text-white">{profile?.full_name}</div>
+              <div className="text-xs text-slate-500 dark:text-slate-400">
+                {profile?.role === 'admin' ? 'Administrador' : profile?.specialty}
+              </div>
+            </div>
+            <LogoutButton />
+          </div>
+        </div>
+      </header>
+      <main className="mx-auto max-w-7xl px-4 py-8">{children}</main>
+    </div>
+  )
+}

@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
@@ -9,6 +9,17 @@ import { CompleteAppointmentModal } from './CompleteAppointmentModal'
 
 export function SpecialistCalendar({ appointments, specialistId }: { appointments: any[], specialistId: string }) {
   const [selectedAppointment, setSelectedAppointment] = useState<any>(null)
+  
+  // Estado para manejar la vista inicial de forma responsiva y segura
+  const [currentView, setCurrentView] = useState('timeGridWeek')
+
+  // Detectamos el ancho de pantalla una vez que el componente monta en el navegador
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const defaultView = window.innerWidth < 768 ? 'timeGridDay' : 'timeGridWeek'
+      setCurrentView(defaultView)
+    }
+  }, [])
 
   // Convertimos las citas de la BD al formato de FullCalendar
   const events = appointments.map(a => {
@@ -45,11 +56,18 @@ export function SpecialistCalendar({ appointments, specialistId }: { appointment
         .fc-button-active { background-color: #1d4ed8 !important; }
         .fc-daygrid-day-number, .fc-timegrid-axis-cushion, .fc-timegrid-slot-label-cushion { color: #94a3b8; }
         .dark .fc-day-today { background-color: rgba(59, 130, 246, 0.1) !important; }
+        
+        /* Ocular botones de texto largos en móviles para que no se desborde la barra */
+        @media (max-width: 767px) {
+          .fc-toolbar { flex-direction: column; gap: 8px; }
+        }
       `}</style>
       
       <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-        initialView="timeGridWeek"
+        // Usamos una 'key' dinámica vinculada a la vista para forzar el redibujado correcto en el cliente
+        key={currentView} 
+        initialView={currentView}
         headerToolbar={{
           left: 'prev,next today',
           center: 'title',
@@ -62,6 +80,7 @@ export function SpecialistCalendar({ appointments, specialistId }: { appointment
         slotMinTime="07:00:00"
         slotMaxTime="21:00:00"
         height="auto"
+        aspectRatio={1.5}
         eventContent={(eventInfo) => (
           <div className="p-1 text-xs overflow-hidden whitespace-nowrap font-medium">
             {eventInfo.timeText} - {eventInfo.event.title}

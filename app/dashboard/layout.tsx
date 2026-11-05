@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { HeartPulse, LogOut } from 'lucide-react'
+import { HeartPulse } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { LogoutButton } from '@/components/ui'
 import { ThemeToggle } from '@/components/ThemeToggle'
@@ -20,14 +20,20 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <Link href="/dashboard" className="flex items-center gap-2 font-bold text-blue-700 dark:text-blue-400">
             <HeartPulse className="h-6 w-6" /> Hospital Unheval
           </Link>
-          <div className="flex items-center gap-4 text-sm">
+          
+          {/* Aquí se integra la sección optimizada para móviles */}
+          <div className="flex items-center gap-3 md:gap-4 text-sm">
             <ThemeToggle />
-            <div className="text-right">
+            
+            {/* Oculta el texto del perfil en pantallas pequeñas (sm:block lo vuelve a mostrar) */}
+            <div className="hidden text-right sm:block">
               <div className="font-medium text-slate-900 dark:text-white">{profile?.full_name}</div>
               <div className="text-xs text-slate-500 dark:text-slate-400">
                 {profile?.role === 'admin' ? 'Administrador' : profile?.specialty}
               </div>
             </div>
+
+            {/* Mantenemos tu botón original que ya sabe cómo cerrar sesión de forma segura */}
             <LogoutButton />
           </div>
         </div>

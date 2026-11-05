@@ -19,7 +19,7 @@ export function LoginForm() {
       password: String(fd.get('password')),
     })
     setLoading(false)
-    if (error) { setError(error.message); return }
+    if (error) { setError('Credenciales inválidas'); return }
     router.push('/dashboard')
     router.refresh()
   }
